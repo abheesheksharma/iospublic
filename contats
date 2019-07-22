@@ -1,0 +1,82 @@
+import UIKit
+import Contacts
+
+struct ContactListVariables {
+    var contactNameStr = String()
+    var contactNumberStr = String()
+    var contactFamilyStr = String()
+}
+
+class ViewController: UIViewController {
+
+    @IBOutlet weak var contactsTableView: UITableView!
+    
+    var contactListData = [ContactListVariables]()
+    
+    let contactStore = CNContactStore()
+    
+    var contactListArr = String()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        contactStore.requestAccess(for: .contacts) { (success, err) in
+            if success{
+                print("Granted")
+                self.fetchContacts()
+            }else{
+                print("Access Denied")
+            }
+        }
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+
+    
+    func fetchContacts(){
+        let key = [CNContactGivenNameKey, CNContactFamilyNameKey, CNContactPhoneNumbersKey] as [CNKeyDescriptor]
+        
+        let request = CNContactFetchRequest(keysToFetch: key)
+        
+        try! contactStore.enumerateContacts(with: request) { ( contact, stoppingPointer) in
+//            self.contactNameStr = contact.givenName
+//            self.contactFamilyStr = contact.familyName
+//            self.contactNumberStr = (contact.phoneNumbers.first?.value.stringValue)!
+            
+            let contactAppend = ContactListVariables(contactNameStr: contact.givenName, contactNumberStr: (contact.phoneNumbers.first?.value.stringValue)!, contactFamilyStr: contact.familyName)
+            self.contactListData.append(contactAppend)
+        }
+        
+        //print(contactListData.first?.contactNameStr)
+        DispatchQueue.main.async {
+            self.contactsTableView.reloadData()
+        }
+        
+    }
+    
+}
+
+extension ViewController: UITableViewDelegate, UITableViewDataSource{
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return contactListData.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let list = contactsTableView.dequeueReusableCell(withIdentifier: "ContactsTableCell", for: indexPath) as! ContactsTableCell
+        
+        //print("hello")
+        
+        list.nameStr.text = contactListData[indexPath.row].contactNameStr
+        list.phoneNumberStr.text = contactListData[indexPath.row].contactNumberStr
+        list.familyName.text = contactListData[indexPath.row].contactFamilyStr
+        return list
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 100
+    }
+    
+}
