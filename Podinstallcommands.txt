@@ -1,0 +1,9 @@
+mkdir -p $HOME/Software/ruby
+export GEM_HOME=$HOME/Software/ruby
+gem install cocoapods
+export PATH=$PATH:$HOME/Software/ruby/bin
+cd/ go to your project folder
+pod init
+open -a Xcode Podfile
+copy pods from https://cocoapods.org/?q=Afnet
+pod install
