@@ -1,0 +1,29 @@
+
+import UIKit
+import Alamofire
+class ViewController: UIViewController {
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+Alamofire.request("https://raw.githubusercontent.com/abheesheksharma/iospublic/master/fetch.json")
+            
+            
+            .responseJSON{ (response) -> Void in
+                if let JSON = response.result.value as? [[String: Any]]{
+                    print(JSON[0]["_id"] as Any)
+            
+            }
+            
+    
+    
+    }
+  
+    }
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+    }
+    
+
+
+}
+
