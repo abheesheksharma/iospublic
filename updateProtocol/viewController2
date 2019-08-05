@@ -1,0 +1,52 @@
+import UIKit
+
+protocol UpdateData {
+    func updateData(nameStr: String)
+}
+var updateDataObj : UpdateData?
+
+class SecondViewController: UIViewController{
+    
+    
+    @IBOutlet weak var nameTxtFld: UITextField!
+    @IBOutlet weak var classTxtFld: UITextField!
+    
+    var nameStr : String?
+    var classStr: String?
+ 
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        self.nameTxtFld.text = nameStr
+        self.classTxtFld.text = classStr
+        print("didload2")
+        // Do any additional setup after loading the view.
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        print("will appear2")
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        //self.nameLbl.text = nameStr
+        print("did appear2")
+    }
+    
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        print("Will disappeared2")
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        print("did disappeard2")
+    }
+    
+    
+    @IBAction func goBackBtn(_ sender: Any) {
+        updateDataObj?.updateData(nameStr: nameTxtFld.text!)
+        self.dismiss(animated: true, completion: nil)
+    }
+    
+
+
+}
