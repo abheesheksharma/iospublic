@@ -1,0 +1,47 @@
+import UIKit
+
+class ViewController: UIViewController, UpdateData {
+
+    
+    @IBOutlet weak var classTxtFld: UITextField!
+    @IBOutlet weak var nameTxtFld: UITextField!
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        updateDataObj = self
+        print("did load")
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        
+        print("Will appeared")
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        
+        print("did appeared")
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        print("Will disappeared")
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        print("did disappeard")
+    }
+    
+    @IBAction func goNextVCBtn(_ sender: Any) {
+        let nextVC = self.storyboard?.instantiateViewController(withIdentifier: "SecondViewController") as! SecondViewController
+        
+        nextVC.nameStr = nameTxtFld.text
+        nextVC.classStr = classTxtFld.text
+        
+        self.present(nextVC, animated: true, completion: nil)
+        
+    }
+    
+    func updateData(nameStr: String) {
+        nameTxtFld.text = nameStr
+    }
+}
+
