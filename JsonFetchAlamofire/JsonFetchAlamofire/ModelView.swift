@@ -10,13 +10,14 @@ import Foundation
 import UIKit
 import SwiftyJSON
 
+
+
 class ModelView: NSObject{
-    var nameStr : String?,
-    emailStr : String?,
-    tag1Str: String?,
-    tag2Str: String?,
-    tag3Str: String?,
-    friendsStr: String?
+    
+//    var allJsonStructObj = AllJsonStruct()
+    
+    var nameStr = String()
+    var friendsStr = [String]()
     
     func handelData(_ dict : JSON) {
         
@@ -35,7 +36,8 @@ class ModelView: NSObject{
     }
     
     func handelFriendData(_ dict : JSON){
-        friendsStr = dict["name"].stringValue
+        friendsStr.append(dict["name"].stringValue)
+        //friendsStr = dict["name"].stringValue
     }
 }
 

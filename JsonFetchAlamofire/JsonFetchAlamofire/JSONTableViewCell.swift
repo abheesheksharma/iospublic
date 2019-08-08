@@ -8,6 +8,7 @@
 
 import UIKit
 
+
 class JSONTableViewCell: UITableViewCell {
 
     @IBOutlet weak var friend1Lbl: UILabel!
