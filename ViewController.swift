@@ -1,114 +1,112 @@
-//
-//  ViewController.swift
-//  ExpandableTableRow
-//
-//  Created by trainee on 28/06/19.
-//  Copyright © 2019 trainee. All rights reserved.
-//
-
 import UIKit
+import WebKit
 
-struct cellData {
-    var opened = Bool()
-    var title = String()
-    var sectionData = [String]()
-}
+class ViewController: UIViewController, WKNavigationDelegate {
 
-
-
-class ViewController: UIViewController {
+    //MARK: Outlets
+    @IBOutlet weak var webView: WKWebView!
+    @IBOutlet weak var txtFldURL: UITextField!
+    @IBOutlet weak var indicatorView: UIActivityIndicatorView!
+    @IBOutlet var viewMain: UIView!
     
-    var tableviewData = [cellData]()
-    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var itemBack: UIBarButtonItem!
+    @IBOutlet weak var itemGoForward: UIBarButtonItem!
+    @IBOutlet weak var itemReload: UIBarButtonItem!
+    @IBOutlet weak var tabBarBottom: UIToolbar!
     
-    
-    
-     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        self.indicatorView.isHidden = true
+        webView.navigationDelegate = self
+        webView.scrollView.bounces = false
+        itemGoForward.isEnabled = false
+        itemReload.isEnabled = false
         
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableviewData = [cellData(opened: false, title: "Vegetables", sectionData: ["Potato", "Tomato", "Cauliflower"]),
-                         cellData(opened: false, title: "Fruits", sectionData: ["Name", "Tomato", "Cauliflower"]),
-            cellData(opened: false, title: "Fast Food", sectionData: ["Potato", "Tomato", "Cauliflower"])
+        itemBack.isEnabled = false
+        
+    }
+    
+    //MARK: Search Button Action
+    @IBAction func btnSearchAction(_ sender: Any) {
+        startIndicator()
+        
+        let urlRegEx = "^(https?://)?(www\\.)?([-a-z0-9]{1,63}\\.)*?[a-z0-9][-a-z0-9]{0,61}[a-z0-9]\\.[a-z]{2,6}(/[-\\w@\\+\\.~#\\?&/=%]*)?$"
+        let urlTest = NSPredicate(format:"SELF MATCHES %@", urlRegEx)
+        let result = urlTest.evaluate(with: txtFldURL.text!)
+        guard result else {
+            let url = "https://www.google.com/search?q=\(txtFldURL.text!)"
+            let encodeURL = url.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+            let searchURL = NSURL(string: encodeURL!)
+//            let encodeURL = URL(fileURLWithPath: "https://www.google.com/search?q=\(txtFldURL.text!)")
+            txtFldURL.text = String(describing: searchURL!)
+            let request = URLRequest(url: searchURL as! URL)
+            webView.load(request)
+            return
+        }
+        let searchURL = NSURL(string: txtFldURL.text!)
+        let request = URLRequest(url: searchURL as! URL)
+        
+        webView.load(request)
+    }
+    
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        if navigationAction.navigationType == WKNavigationType.linkActivated {
+            startIndicator()
+            txtFldURL.text = String(describing: navigationAction.request.url!)
             
-        ]
-        
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-}
-
-
-
-extension ViewController: UITableViewDelegate{
-    func numberOfSections(in tableView: UITableView) -> Int {
-            return tableviewData.count
-    }
-    
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
-        
-        if indexPath.row == 0{
-            if tableviewData[indexPath.section].opened == true{
-                tableviewData[indexPath.section].opened = false
-                //cells.actionLabel?.text = "close"
-                let sections = IndexSet.init(integer: indexPath.section)
-                tableView.reloadSections(sections, with: .none)
-            }
-            else{
-                tableviewData[indexPath.section].opened = true
-                //cells.actionLabel?.text = "open"
-                let sections = IndexSet.init(integer: indexPath.section)
-                tableView.reloadSections(sections, with: .none)
-            }
+            decisionHandler(WKNavigationActionPolicy.allow)
+            return
         }
+        decisionHandler(WKNavigationActionPolicy.allow)
     }
     
-    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return String(tableviewData[section].title)
-    }
-    
-    
-}
-
-extension ViewController: UITableViewDataSource{
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if(tableviewData[section].opened == true){
-            return tableviewData[section].sectionData.count + 1
-        }
-        else{
-            return 1
-        }
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+       stopIndicator()
         
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cells = tableView.dequeueReusableCell(withIdentifier: "cell") as! TableViewCellsFile
-        
-        if indexPath.row == 0{
-            cells.pointsText?.text = tableviewData[indexPath.section].title
-             if(tableviewData[indexPath.section].opened == true){
-                   cells.actionLabel?.text = "close"
-             }else{
-                   cells.actionLabel?.text = "open"
-            }
-            return cells
+    @IBAction func itemReloadWeb(_ sender: Any) {
+        startIndicator()
+        webView.reload()
+    }
+    
+    @IBAction func itemGoForward(_ sender: Any) {
+        startIndicator()
+        webView.goForward()
+    }
+    
+    @IBAction func itemGoBack(_ sender: Any) {
+        startIndicator()
+        webView.goBack()
+    }
+    
+    //MARK: Indicator Functions
+    func stopIndicator(){
+        checkGoBackForward()
+        indicatorView.stopAnimating()
+        indicatorView.isHidden = true
+        viewMain.alpha = 1
+    }
+    
+    func startIndicator(){
+        checkGoBackForward()
+        viewMain.alpha = 0.6
+        indicatorView.isHidden = false
+        indicatorView.startAnimating()
+    }
+    
+    func checkGoBackForward(){
+         itemReload.isEnabled = true
+        if webView.canGoBack{
+            itemBack.isEnabled = true
+        }else{
+            itemBack.isEnabled = false
         }
-        else{
-           
-        cells.pointsText?.text = tableviewData[indexPath.section].sectionData[indexPath.row-1]
-            cells.actionLabel?.text = ""
-            
-             //cells.pointsText?.text = tableviewData[indexPath.section].title
-      //  cells.pointsText?.text = tableviewData[indexPath.section].title
-            return cells
+        if webView.canGoForward{
+            itemGoForward.isEnabled = true
+        }else{
+            itemGoForward.isEnabled = false
         }
     }
 }
+
